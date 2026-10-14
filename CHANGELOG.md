@@ -1,14 +1,16 @@
 # Changelog
 
-## 0.1.1 (2026-10-14)
+## 0.1.1 (2026-10-15)
 
 - Fixed: a Foothold Demo Course placed in a level had no section starts in a packaged (cooked) game, because they were
   built in OnConstruction, which cooked games don't run, and weren't saved. They're saved with the actor now, and a
   course saved before this fix rebuilds itself on BeginPlay. New test: `Foothold.Demo.SectionStartsSurviveSaveAndLoad`.
 - Fixed: the course's labels made the cook warn `Saving FText ... initialized from FString`; they're culture-invariant
   text now.
-- README: results of packaged-build, dedicated-server and network-condition testing, and two UE 5.8 Mover issues to know
-  about.
+- README: results of packaged-build, dedicated-server and network-condition testing, as tables (Win64, Linux and
+  Android in Development and Shipping, Linux dedicated servers, Unreal's packet emulation, Linux netem, and an Android
+  phone over Wi-Fi), two UE 5.8 Mover issues to know about, and Network Prediction's `FixedTickInputSendCount` for
+  low-frame-rate clients (a 15 fps phone with packet loss lost a jump press at the default of 6; 16 fixed it).
 
 ## 0.1 (2026-10-14)
 

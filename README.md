@@ -100,7 +100,7 @@ git clone https://github.com/gregorik/Foothold-Core.git FootholdCore
 ```
 
 Then regenerate project files, build, and enable **Foothold Core** in Edit > Plugins. Mover and Enhanced Input are
-enabled with it. If you'd rather not compile, the [v0.1 release](https://github.com/gregorik/Foothold-Core/releases)
+enabled with it. If you'd rather not compile, the [latest release](https://github.com/gregorik/Foothold-Core/releases/latest)
 has a Win64 zip with the editor binaries built against UE 5.8.3: unzip it into `Plugins/` and open the project. On
 another 5.8 patch, Unreal will offer to rebuild them, which needs a C++ toolchain.
 
