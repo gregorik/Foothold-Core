@@ -1,0 +1,25 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1",
+	"FriendlyName": "Foothold Core",
+	"Description": "Open-source Mover traversal for UE 5.8: mantle, ledge hang and ladders as real, networked Mover movement modes, with animation data for your own Anim Blueprint, a ladder actor, a ready-made pawn and a demo course. Foothold Pro adds climbing, glide, wall-run, slide, the animation nodes and the GASP setup.",
+	"Category": "Gameplay",
+	"CreatedBy": "GregOrigin",
+	"CreatedByURL": "https://www.gregorigin.com",
+	"DocsURL": "https://github.com/gregorik/Foothold-Core#readme",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/gregorik/Foothold-Core/issues",
+	"EngineVersion": "5.8.0",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{ "Name": "Foothold", "Type": "Runtime", "LoadingPhase": "Default" }
+	],
+	"Plugins": [
+		{ "Name": "Mover", "Enabled": true },
+		{ "Name": "EnhancedInput", "Enabled": true }
+	]
+}
