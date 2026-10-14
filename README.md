@@ -206,7 +206,9 @@ This movement code is the same as Foothold Pro's, and I tested it there: with a 
 Linux dedicated servers in Development and Shipping serving packaged Windows and Android clients, the client driving a
 course through scripted input. In every run the server saw the same mode changes, in the same order, as the client,
 including with lag, packet loss, duplicates and reordering added (by Unreal's packet emulation, and separately by
-Linux's network emulation on the server). That was all on one PC, not yet over a network between machines.
+Linux's network emulation on the server), and with a phone joining over Wi-Fi. The exception was a 15 fps phone with
+loss added, where Network Prediction's default input settings sometimes dropped a jump press. The numbers, and the
+setting that fixed it, are under [Tests](#packaged-builds-dedicated-servers-and-bad-networks).
 
 Two UE 5.8 engine issues showed up, both reproduced with Mover's own `UCharacterMoverComponent` pawn and no Foothold
 code:
@@ -296,8 +298,72 @@ demo course (4), and smoke tests for the pawn and Mover. Run them from **Tools >
 UnrealEditor-Cmd.exe YourProject.uproject -ExecCmds="Automation RunTests Foothold; Quit" -unattended -NullRHI
 ```
 
-For v0.1 they all pass on UE 5.8 (Win64) in a clean, content-free host project, and the plugin also builds with
+For v0.1.1 they all pass on UE 5.8 (Win64) in a clean, content-free host project, and the plugin also builds with
 strict includes (no PCH, no unity).
+
+### Packaged builds, dedicated servers and bad networks
+
+Core's three modes, their transitions, the component and the ladder are the same source files as Foothold Pro's
+(synced from it), so I tested them in Pro's dev project: packaged the way a game ships, for Windows, Linux and Android,
+in Development and Shipping, with a bot driving it through Pro's 9-section course (it includes Core's mantle, ledge
+and ladder sections) and recording every mode change, in Shipping too. That's how the packaged-game bug fixed in
+0.1.1 turned up.
+
+**Single player:** sections passed, out of 9.
+
+| Platform | Development | Shipping |
+|---|---|---|
+| Windows (Win64) | 9/9 | 9/9 |
+| Linux | 9/9 | 9/9 |
+| Android (x86_64, on the Android 16 emulator, Vulkan) | 9/9 | 9/9 |
+| Android phone (arm64): Honor X5c Plus, MediaTek Helio G85, Mali-G52, Android 15; about 15 fps | 9/9 | 9/9 |
+
+**Multiplayer:** one dedicated server and one client. The client's mode changes, as it showed them, match what the
+server saw for that pawn, in the same order, and all 9 sections passed, in every run except the two explained below the
+table. The phone was a real device on the PC's Wi-Fi.
+
+| Server | Client | Network | Mode changes (client = server) | Client corrections |
+|---|---|---|---|---|
+| Linux, Development | Windows, Development | clean | 63 = 63 | 11 |
+| Linux, Development | Windows, Development | Unreal, average | 63 = 63 | 12 |
+| Linux, Development | Windows, Development | Unreal, heavy | 63 = 63 | 11 |
+| Linux, Development | Windows, Development | netem | 63 = 63 | 23 |
+| Linux, Development | Android, Development | netem + emulator link 40-100 ms | 64 = 64 | not measured |
+| Linux, Shipping | Windows, Shipping | clean | 63 = 63 | no log in Shipping |
+| Linux, Shipping | Windows, Shipping | netem | 63 = 63 | no log in Shipping |
+| Windows editor as server | Windows, Development | clean | 63 = 63 | 11 |
+| Windows editor as server | Windows, Development | Unreal, heavy | 63 = 63 | 10 |
+| Windows editor as server | Android, Development | clean | 64 = 64 | not measured |
+| Windows editor as server | Android, Development | Unreal, heavy + emulator link 60-140 ms | 64 = 64 | not measured |
+| Windows editor as server | Android phone, Development | Wi-Fi | 64 = 64 | not measured |
+| Windows editor as server | Android phone, Development | Wi-Fi + Unreal, heavy | 61 = 61 | not measured |
+| Linux, Development | Android phone, Development | Wi-Fi | 64 = 64 | not measured |
+| Linux, Development | Android phone, Development | Wi-Fi + netem | **1 of 3 runs passed**; in the other 2 the server missed one jump press (below) | not measured |
+| Linux, Development | Android phone, Development | Wi-Fi + netem, `FixedTickInputSendCount` 16 | 4 of 4 runs passed, 61-64 the same on both sides | not measured |
+
+- **Unreal, average:** Unreal's packet emulation on both ends, 60 ± 15 ms each way, 1% loss.
+- **Unreal, heavy:** 150 ± 40 ms each way, 5% loss, 1% duplicates, reordering (about 300 ms round trip).
+- **netem:** Linux's network emulation on the server's network card, both ways and below the engine, so it applies
+  to Shipping builds too (they have no packet emulation): 80 ± 25 ms each way, 3% loss, 1% duplicates, 5% reordered.
+- **Emulator link:** the Android emulator's own network delay, on top of the rest.
+- **Wi-Fi:** the phone on the same home Wi-Fi as the PC; the Linux server in WSL was reached through a UDP relay on the
+  PC, because WSL's network doesn't take connections from the LAN.
+
+Corrections under netem about doubled. The Linux servers are packaged Server builds; both stayed up after their
+client left. The Shipping clients joined from a level without a pawn (see the engine issues under
+[How it works](#how-it-works)). Apart from the phone, it all ran on one PC (the Linux server in WSL, the emulator), and
+nothing ran over the internet.
+
+**A phone at 15 fps, and Network Prediction's input settings.** The phone ran the game at about 15 fps, so each of
+its updates carried about 4 new input frames of Mover's 60 Hz simulation, and Network Prediction's default sends only
+the 6 most recent with each update. Over Wi-Fi with netem's loss and reordering on top, the server regularly lacked a
+client input frame (35-46 "Gap in input stream" faults a run) or ran out of buffered input (20-30 faults a run). In 2
+of 3 runs one of those frames held a jump press: the server didn't jump, so the mantle the client had predicted off
+that jump was rolled back a few frames later, and the bot ended that section one step short, on both sides alike.
+What was lost was Mover's own jump input; after the rollback every mode change matched the server's again. With
+**`FixedTickInputSendCount` raised to 16** (Project Settings > Project > Network Prediction, under Input; server and
+client must use the same value) the input gaps went to zero and 4 of 4 runs passed. The input-starvation faults
+remained, so a press can still arrive late on a client this slow. If you ship to phones, raise it.
 
 ## Core vs Pro
 
@@ -363,8 +429,8 @@ yet, so back up first. Don't enable both at once: they share the module name.
 - **Ledge hang can't climb down onto a wall.** That hands over to the Climbing mode, which is in Pro. `ClimbDownHoldTime`
   does nothing without it.
 - **Tested** on Win64 here (48 automation tests in a clean project, a strict build), and through Foothold Pro's
-  identical movement code in packaged Windows, Linux and Android builds and on Linux dedicated servers. Not yet on a
-  physical Android device or over a network between machines.
+  identical movement code in packaged Windows, Linux and Android builds (the emulator and a phone) and on Linux
+  dedicated servers, over loopback and over Wi-Fi. Not yet over the internet.
 
 ## FAQ
 
