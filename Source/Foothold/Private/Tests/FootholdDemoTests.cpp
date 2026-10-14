@@ -13,6 +13,8 @@
 #include "FootholdTraceLibrary.h"
 #include "MoverComponent.h"
 #include "MoverSimulationTypes.h"
+#include "Serialization/ObjectReader.h"
+#include "Serialization/ObjectWriter.h"
 #include "Tests/FootholdTestCharacter.h"
 #include "Tests/FootholdTestWorld.h"
 
@@ -60,6 +62,32 @@ bool FFootholdDemoCourseBuilds::RunTest(const FString& Parameters)
 	FHitResult Ground;
 	TestTrue(TEXT("the player start stands on the course floor"),
 		W.World->LineTraceSingleByChannel(Ground, PlayerStart.GetLocation(), PlayerStart.GetLocation() - FVector(0, 0, 300), ECC_Visibility));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFootholdDemoCourseKeepsStartsWhenLoaded, "Foothold.Demo.SectionStartsSurviveSaveAndLoad",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FFootholdDemoCourseKeepsStartsWhenLoaded::RunTest(const FString& Parameters)
+{
+	// A course placed in a level is saved with what OnConstruction built, and a cooked game loads it without running
+	// construction again. Copy a built course through serialization (what saving and loading do) and check the copy
+	// still knows its section starts.
+	FFootholdTestWorld W;
+	AFootholdDemoCourse* Built = W.Spawn<AFootholdDemoCourse>(FVector(300, -200, 0), FRotator(0, 20, 0));
+	if (!TestNotNull(TEXT("course spawns"), Built))
+	{
+		return false;
+	}
+	TArray<uint8> Bytes;
+	FObjectWriter(Built, Bytes);
+	AFootholdDemoCourse* Loaded = NewObject<AFootholdDemoCourse>(W.World->PersistentLevel, NAME_None, RF_Transient);
+	FObjectReader(Loaded, Bytes);
+	for (const FName Section : AFootholdDemoCourse::GetSectionNames())
+	{
+		const FTransform Start = Loaded->GetSectionStart(Section);
+		TestFalse(*FString::Printf(TEXT("loaded course has a start for %s"), *Section.ToString()), Start.Equals(FTransform::Identity));
+		TestTrue(*FString::Printf(TEXT("loaded start for %s matches the built one"), *Section.ToString()), Start.Equals(Built->GetSectionStart(Section), 0.1));
+	}
 	return true;
 }
 

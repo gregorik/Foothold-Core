@@ -7,7 +7,7 @@
 [![Mover](https://img.shields.io/badge/Mover-Experimental-ff8a2a)](https://dev.epicgames.com/documentation/en-us/unreal-engine/mover-in-unreal-engine)
 [![Platform: Win64](https://img.shields.io/badge/Platform-Win64-0078D4?logo=windows&logoColor=white)](#install)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus&logoColor=white)](Source/Foothold)
-[![Tests: 47 passing](https://img.shields.io/badge/tests-47%20passing-2ea44f)](#tests)
+[![Tests: 48 passing](https://img.shields.io/badge/tests-48%20passing-2ea44f)](#tests)
 [![Release](https://img.shields.io/github/v/release/gregorik/Foothold-Core?include_prereleases&label=release)](https://github.com/gregorik/Foothold-Core/releases)
 [![Foothold Pro](https://img.shields.io/badge/Foothold%20Pro-coming%20to%20Fab-36d6ff)](https://www.fab.com/sellers/GregOrigin)
 [![Stars](https://img.shields.io/github/stars/gregorik/Foothold-Core?style=social)](https://github.com/gregorik/Foothold-Core/stargazers)
@@ -87,7 +87,7 @@ Also in the box:
   Ladders replicate, so ones you spawn at runtime work in multiplayer too.
 - **`AFootholdCharacter`**: a ready-made pawn (capsule, mesh, camera, Mover, Enhanced Input).
 - **`AFootholdDemoCourse`**: a course with a section for each move, built from engine cubes.
-- **47 automation tests**, and the full C++ source. No Blueprints, no content, no external dependencies beyond Mover and
+- **48 automation tests**, and the full C++ source. No Blueprints, no content, no external dependencies beyond Mover and
   Enhanced Input.
 
 ## Install
@@ -202,10 +202,18 @@ A few rules hold it together:
 - **All Foothold state is one sync struct**, `FFootholdSyncState`. It serializes only the fields the current mode
   uses and reconciles at 2 cm. Inputs travel in `FFootholdInputs`, and button presses survive Mover's input merging.
 
-This movement code is the same as Foothold Pro's, and I tested it there with a listen server and a client on loopback,
-the client driving a course through scripted input: the server saw the same mode changes, in the same order, as the
-client, and on the template pawn none of the client's corrections landed in the middle of a Foothold mode. I haven't
-tested a dedicated server or a real network with lag and packet loss yet.
+This movement code is the same as Foothold Pro's, and I tested it there: with a listen server, and with packaged
+Linux dedicated servers in Development and Shipping serving packaged Windows and Android clients, the client driving a
+course through scripted input. In every run the server saw the same mode changes, in the same order, as the client,
+including with lag, packet loss, duplicates and reordering added (by Unreal's packet emulation, and separately by
+Linux's network emulation on the server). That was all on one PC, not yet over a network between machines.
+
+Two UE 5.8 engine issues showed up, both reproduced with Mover's own `UCharacterMoverComponent` pawn and no Foothold
+code:
+- **A Shipping client crashes when it joins a server from a level that has a Mover pawn**, in Mover's teardown of that
+  pawn (`UKinematicActorSimulation::BeginDestroy`). Join from a level without one, such as a menu, and it doesn't.
+- **Development and Shipping builds can't play together over Mover** (Network Prediction adds debug checksums outside
+  Shipping). Ship server and client in the same configuration.
 
 ## Settings
 
@@ -279,9 +287,9 @@ on the server (`ServerExec Foothold.SpawnDemo`). `GetSectionStart(Name)` returns
 
 ## Tests
 
-47 automation tests ship with the source, under `Source/Foothold/Private/Tests`: each mode's entries, exits and edge
+48 automation tests ship with the source, under `Source/Foothold/Private/Tests`: each mode's entries, exits and edge
 cases (16), the probes (10), the component and its inputs (7), the sync state's serialization (5), the ladder (3), the
-demo course (3), and smoke tests for the pawn and Mover. Run them from **Tools > Test Automation** with the filter
+demo course (4), and smoke tests for the pawn and Mover. Run them from **Tools > Test Automation** with the filter
 `Foothold`, or from the command line:
 
 ```bash
@@ -354,8 +362,9 @@ yet, so back up first. Don't enable both at once: they share the module name.
 - **No getting onto a ladder from its top.** You climb on from the bottom or from the air.
 - **Ledge hang can't climb down onto a wall.** That hands over to the Climbing mode, which is in Pro. `ClimbDownHoldTime`
   does nothing without it.
-- **Tested on Win64**, on a listen server and a client on loopback. Not yet on a dedicated server, in a packaged game,
-  or over a real network.
+- **Tested** on Win64 here (48 automation tests in a clean project, a strict build), and through Foothold Pro's
+  identical movement code in packaged Windows, Linux and Android builds and on Linux dedicated servers. Not yet on a
+  physical Android device or over a network between machines.
 
 ## FAQ
 

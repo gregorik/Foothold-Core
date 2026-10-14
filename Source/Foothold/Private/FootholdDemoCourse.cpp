@@ -80,6 +80,17 @@ void AFootholdDemoCourse::OnConstruction(const FTransform& Transform)
 	Rebuild();
 }
 
+void AFootholdDemoCourse::BeginPlay()
+{
+	Super::BeginPlay();
+	// A course saved into a level before its section starts were saved with it comes back without them in a cooked
+	// game (no construction script runs there). Rebuild it: the geometry is the same.
+	if (LocalStarts.IsEmpty())
+	{
+		Rebuild();
+	}
+}
+
 void AFootholdDemoCourse::AddBox(UInstancedStaticMeshComponent* Mesh, const FVector& Center, const FVector& Size, const FRotator& Rotation)
 {
 	Mesh->AddInstance(FTransform(Rotation, Center, Size / 100.f));	// the engine cube is 100 cm, centred
@@ -109,7 +120,7 @@ void AFootholdDemoCourse::PlaceLabel(int32 Index, const FVector& Location, const
 		return;
 	}
 	Label->SetRelativeLocationAndRotation(Location, FRotator(0.f, 180.f, 0.f));	// readable from the course start
-	Label->SetText(FText::FromString(Text));
+	Label->SetText(FText::AsCultureInvariant(Text));	// not localized; FromString text warns when the level is cooked
 	Label->SetWorldSize(LabelSize);
 	Label->SetTextRenderColor(FColor::White);
 	Label->SetVisibility(bShowLabels);

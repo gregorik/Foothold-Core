@@ -34,6 +34,7 @@ public:
 	AFootholdDemoCourse();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
 
 	/** Clears and rebuilds the course. */
 	UFUNCTION(BlueprintCallable, Category = "Foothold|Demo")
@@ -99,7 +100,11 @@ protected:
 	TObjectPtr<UMaterialInterface> BaseMaterial;
 
 private:
-	/** Section starts in actor space. */
+	/**
+	 * Section starts in actor space. Saved with the actor: a cooked game loads a placed course without running
+	 * OnConstruction, so starts that only lived in memory would be gone.
+	 */
+	UPROPERTY()
 	TMap<FName, FTransform> LocalStarts;
 
 	void AddBox(UInstancedStaticMeshComponent* Mesh, const FVector& Center, const FVector& Size, const FRotator& Rotation = FRotator::ZeroRotator);
