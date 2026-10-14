@@ -179,7 +179,6 @@ hands and wall clearance on top, or a procedural pose when you have no clips.
 
 ```mermaid
 stateDiagram-v2
-    direction LR
     Walking --> Mantle: Air mantle (edge 45 to 150 cm up)
     Falling --> Mantle: Air mantle
     Falling --> LedgeHang: Ledge grab (edge at hand height)
