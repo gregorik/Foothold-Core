@@ -9,7 +9,7 @@
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus&logoColor=white)](Source/Foothold)
 [![Tests: 48 passing](https://img.shields.io/badge/tests-48%20passing-2ea44f)](#tests)
 [![Release](https://img.shields.io/github/v/release/gregorik/Foothold-Core?include_prereleases&label=release)](https://github.com/gregorik/Foothold-Core/releases)
-[![Foothold Pro](https://img.shields.io/badge/Foothold%20Pro-coming%20to%20Fab-36d6ff)](https://www.fab.com/sellers/GregOrigin)
+[![Foothold Pro](https://img.shields.io/badge/Foothold%20Pro-on%20Fab-36d6ff)](https://www.fab.com/listings/d05680c0-a0ef-4bec-8777-c4749b56f5c7)
 [![Stars](https://img.shields.io/github/stars/gregorik/Foothold-Core?style=social)](https://github.com/gregorik/Foothold-Core/stargazers)
 
 **Mantle, ledge hang and ladders for Unreal Engine 5.8's Mover, as real movement modes.**<br>
@@ -371,12 +371,12 @@ remained, so a press can still arrive late on a client this slow. If you ship to
 
 Core is the movement half of Foothold, and it's yours under MIT. **Foothold Pro** is the whole plugin: all seven moves,
 the animation layer that makes them look right with your own clips, and one-click setup for the Game Animation Sample.
-It's [coming to Fab](https://www.fab.com/sellers/GregOrigin) (GregOrigin's seller page), and its full manual is
+It's [on Fab](https://www.fab.com/listings/d05680c0-a0ef-4bec-8777-c4749b56f5c7), and its full manual is
 already up at [gregorigin.com/Manuals/Foothold](https://gregorigin.com/Manuals/Foothold).
 
 <div align="center">
 
-| | **Foothold Core** (this repo) | **Foothold Pro** (Fab) |
+| | **Foothold Core** (this repo) | [**Foothold Pro**](https://www.fab.com/listings/d05680c0-a0ef-4bec-8777-c4749b56f5c7) |
 |---|:---:|:---:|
 | **Price** | Free | Paid |
 | **License** | MIT | Fab EULA |
